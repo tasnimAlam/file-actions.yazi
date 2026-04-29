@@ -1,5 +1,7 @@
 # file-actions.yazi
 
+> **Original code:** [BBOOXX/file-actions.yazi](https://github.com/BBOOXX/file-actions.yazi)
+
 a file action script plugin for [Yazi](https://github.com/sxyazi/yazi) that allows users to pass selected files into action scripts to perform corresponding actions on the files.
 
 > [!NOTE]
@@ -8,32 +10,23 @@ a file action script plugin for [Yazi](https://github.com/sxyazi/yazi) that allo
 ## Installation
 On **Linux** and **Mac**, install **file-actions.yazi** using the following command:
 ```sh
-git clone https://github.com/BBOOXX/file-actions.yazi.git ~/.config/yazi/plugins/file-actions.yazi
+git clone https://github.com/tasnimAlam/file-actions.yazi.git ~/.config/yazi/plugins/file-actions.yazi
+```
+or 
+
+```sh
+ya pkg -a tasnimAlam/file-actions
 ```
 
-For Termux users, you need to install file first:
-```sh
-pkg install file
-```
 
 ## Configuration
 ```toml
 # keymap.toml
-[[manager.prepend_keymap]]
-on = [ "f" ]
+[[mgr.prepend_keymap]]
+on = [ "F" ]
 run = "plugin file-actions -- --around "
 desc= "Perform actions on selected files"
-```
 
-Or in another different style:
-```toml
-# keymap.toml
-[manager]
-prepend_keymap = [
-# ...
-	{ on = [ "f" ], run = "plugin file-actions -- --around ", desc= "Perform actions on selected files"},
-# ...
-]
 ```
 
 ## Action Script Setup
@@ -116,5 +109,3 @@ This script is a basic template and should be modified according to the specific
 │               └── blabla.sh
 └── yazi.toml
 ```
-
-https://github.com/BBOOXX/file-actions.yazi/assets/7044834/6c96c90c-1c1e-4a82-8057-f5bcba1ed984

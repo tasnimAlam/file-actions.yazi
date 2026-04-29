@@ -1,14 +1,14 @@
 Popup = {
 	Key = {
 		cands = {
-			{ on = "j", desc = "下一项" },
-			{ on = "<Down>", desc = "下一项" },
-			{ on = "k", desc = "上一项" },
-			{ on = "<Up>", desc = "上一项" },
-			{ on = "G", desc = "最后一项" },
-			{ on = "g", desc = "第一项" },
-			{ on = "<Esc>", desc = "取消" },
-			{ on = "<Enter>", desc = "确认" },
+			{ on = "j", desc = "Next item" },
+			{ on = "<Down>", desc = "Next item" },
+			{ on = "k", desc = "Previous item" },
+			{ on = "<Up>", desc = "Previous item" },
+			{ on = "G", desc = "Last item" },
+			{ on = "g", desc = "First item" },
+			{ on = "<Esc>", desc = "Cancel" },
+			{ on = "<Enter>", desc = "Confirm" },
 		},
 		key_to_action = {
 			[1] = "next", -- on = "j"
@@ -28,7 +28,7 @@ Popup.Menu = {
 }
 
 function Popup.Menu:new(area)
-	--- 界面入口
+	--- UI entry point
 	--- https://github.com/sxyazi/yazi/pull/2205
 	self._area = Popup.center_layout(area, self._popup_height)
 	return self
@@ -45,21 +45,21 @@ function Popup.Menu:redraw()
 end
 
 function Popup.Menu:init(item_list, around, onConfirm, onCancel)
-	--- 初始化对象
+	--- Initialize object
 	local newObj = {
-		-- 设定滚动偏移量，即光标上下的保留行数
+		-- Scroll offset: number of reserved rows above and below the cursor
 		scroll_offset = 3,
-		-- 显示窗口最大项目数
+		-- Maximum number of items in the display window
 		window_size = 10,
-		-- 环绕模式
+		-- Wrap/around mode
 		around = around or false,
-		-- 菜单的项目
+		-- Menu items
 		item_list = item_list,
-		-- 确认的时候执行这个
+		-- Execute this on confirm
 		onConfirm = onConfirm or function(cursor)
 			return cursor
 		end,
-		-- 取消的时候执行这个
+		-- Execute this on cancel
 		onCancel = onCancel or function()
 			return
 		end,
@@ -69,36 +69,36 @@ function Popup.Menu:init(item_list, around, onConfirm, onCancel)
 end
 
 local miscellaneous = ya.sync(function()
-	--- 杂项
+	--- Miscellaneous
 	local result = {}
-	-- 光标下的文件
+	-- File under cursor
 	result.cursor_files = {}
 	local hovered = cx.active.current.hovered
-	-- 空文件夹时 没有光标下的文件
+	-- No file under cursor when folder is empty
 	if hovered and not hovered.url.is_archive then
 		table.insert(result.cursor_files, tostring(cx.active.current.hovered.url))
 	end
 
-	-- 已选择的文件
+	-- Selected files
 	result.selected_files = {}
 	for _, url in pairs(cx.active.selected) do
 		if not url.is_archive then
 			table.insert(result.selected_files, tostring(url))
 		end
 	end
-	-- 动作脚本路径
+	-- Action script path
 	result.actions_path = string.format("%s/.config/yazi/plugins/file-actions.yazi/actions", os.getenv("HOME"))
 	return result
 end)
 
 function Popup.center_layout(area, height)
-	-- 返回在 parent 区域居中的 rect
-	-- height 窗口区域高度
+	-- Return rect centered in parent area
+	-- height: window area height
 	local r = rt.mgr.ratio
 	--luacheck: ignore parent_layout preview_layout
 	local parent_layout, current_layout, preview_layout = table.unpack(ui
 		.Layout()
-		-- 配置文件定义的布局
+		-- Layout defined in config file
 		:direction(ui.Layout.HORIZONTAL)
 		:constraints({
 			ui.Constraint.Ratio(r.parent, r.all),
@@ -109,7 +109,7 @@ function Popup.center_layout(area, height)
 	--luacheck: ignore left_margin right_margin
 	local left_margin, centered_content_layout, right_margin = table.unpack(ui
 		.Layout()
-		-- 左中右
+		-- Left, center, right
 		:direction(ui.Layout.HORIZONTAL)
 		:constraints({
 			ui.Constraint.Ratio(1, 6),
@@ -121,11 +121,11 @@ function Popup.center_layout(area, height)
 	--luacheck: ignore top_margin bottom_margin
 	local top_margin, centered_ontent = table.unpack(ui
 		.Layout()
-		-- 上中没下
+		-- Top and center, no bottom
 		:direction(ui.Layout.VERTICAL)
 		:constraints({
 			ui.Constraint.Length(1),
-			ui.Constraint.Length(height + 2), -- 窗口高度加上Padding
+			ui.Constraint.Length(height + 2), -- Window height plus padding
 		})
 		:split(centered_content_layout))
 
@@ -134,28 +134,28 @@ end
 
 function Popup.Menu.render(area, items, cursor)
 	-- area : rect
-	-- items : 菜单项目
-	-- cursor : 窗口中光标的位置
+	-- items : menu items
+	-- cursor : cursor position in window
 	local list_items = {}
 	for i, item in ipairs(items) do
 		list_items[#list_items + 1] = ui.Line(item):style(i == cursor and th.indicator.current or nil)
 	end
 	return {
-		-- 清理区域
+		-- Clear area
 		ui.Clear(area),
-		-- 边框
+		-- Border
 		ui.Border(ui.Edge.ALL):area(area):type(ui.Border.ROUNDED):style(th.mgr.border_style),
-		-- 列表
+		-- List
 		ui.List(list_items):area(area:pad(ui.Pad.xy(1, 1))),
 	}
 end
 
 Popup.Menu.draw_popup = ya.sync(function(self, display, height, items, cursor)
-	-- 绘制窗口
-	-- display : 绘制窗口吗？
-	-- height : 窗口高度
-	-- items : 菜单项目
-	-- cursor : 窗口中光标的位置
+	-- Draw window
+	-- display : draw the window?
+	-- height : window height
+	-- items : menu items
+	-- cursor : cursor position in window
 
 	Popup.Menu._popup_height = display and height or nil
 	Popup.Menu._popup_items = display and items or nil
@@ -171,18 +171,18 @@ Popup.Menu.draw_popup = ya.sync(function(self, display, height, items, cursor)
 end)
 
 function Popup.Menu:show()
-	-- 显示范围 开始
+	-- Display range start
 	local window_start = 1
-	-- 窗口高度
+	-- Window height
 	local window_height = math.min(self.window_size, #self.item_list)
-	-- 显示范围 结束 项目少就不用那么大窗口
+	-- Display range end - use smaller window if fewer items
 	local window_end = window_height
-	-- 光标在窗口内的位置
+	-- Cursor position within window
 	local window_cursor = 1
-	-- 光标实际位置
+	-- Actual cursor position
 	local cursor = 1
 	while true do
-		-- 绘制窗口
+		-- Draw window
 		Popup.Menu.draw_popup(
 			true,
 			window_height,
@@ -190,69 +190,69 @@ function Popup.Menu:show()
 			window_cursor
 		)
 
-		-- 获取输入
+		-- Get input
 		local key = ya.which({ cands = Popup.Key.cands, silent = true })
 		local key_action = Popup.Key.key_to_action[key]
 
 		::handle_key_action::
-		-- 根据键入的动作调整光标位置或窗口显示范围
+		-- Adjust cursor position or window display range based on action
 		if key_action == "next" then
-			-- 在边界之前光标可以向下
-			-- 或者滑窗到底了也允许光标向下
+			-- Cursor can move down before reaching boundary
+			-- Or cursor can move down if window has scrolled to bottom
 			if window_cursor < (window_height - self.scroll_offset) or window_end == #self.item_list then
-				-- 环绕模式
+				-- Wrap mode
 				if self.around and window_cursor == window_height then
-					key_action = "first" -- 跳转到顶部
+					key_action = "first" -- Jump to top
 					goto handle_key_action
 				else
-					-- 保证不出边界
+					-- Ensure within bounds
 					window_cursor = math.min(window_cursor + 1, window_height)
 					cursor = math.min(cursor + 1, #self.item_list)
 				end
-			-- 到达边界则滚动内容 (调整滑窗)
-			-- 滚到底会移动光标不用担心窗口继续滑动
+			-- Scroll content when reaching boundary (adjust sliding window)
+			-- Scrolling to bottom moves cursor, no need to worry about window continuing to slide
 			elseif window_cursor == (window_height - self.scroll_offset) then
 				window_start = window_start + 1
 				window_end = window_end + 1
 				cursor = cursor + 1
 			end
-		-- 在边界之前光标可以向上
-		-- 或者滑窗到顶了也允许光标向上
+		-- Cursor can move up before reaching boundary
+		-- Or cursor can move up if window has scrolled to top
 		elseif key_action == "prev" then
 			if window_cursor > (1 + self.scroll_offset) or window_start == 1 then
-				-- 环绕模式
+				-- Wrap mode
 				if self.around and window_cursor == 1 then
-					key_action = "last" -- 跳转到底部
+					key_action = "last" -- Jump to bottom
 					goto handle_key_action
 				else
-					-- 保证不出边界
+					-- Ensure within bounds
 					window_cursor = math.max(window_cursor - 1, 1)
 					cursor = math.max(cursor - 1, 1)
 				end
-			-- 到达边界则滚动内容 (调整滑窗)
-			-- 滚到底会移动光标不用担心窗口继续滑动
+			-- Scroll content when reaching boundary (adjust sliding window)
+			-- Scrolling to top moves cursor, no need to worry about window continuing to slide
 			elseif window_cursor == (1 + self.scroll_offset) then
 				window_start = window_start - 1
 				window_end = window_end - 1
 				cursor = cursor - 1
 			end
-		elseif key_action == "last" then -- 跳转到底部
+		elseif key_action == "last" then -- Jump to bottom
 			window_cursor = window_height
 			window_start = #self.item_list - window_height + 1
 			window_end = #self.item_list
 			cursor = #self.item_list
-		elseif key_action == "first" then -- 跳转到顶部
+		elseif key_action == "first" then -- Jump to top
 			window_cursor = 1
 			window_start = 1
 			window_end = window_height
 			cursor = 1
-		elseif key_action == "confirm" then -- 确认
-			-- 恢复界面
+		elseif key_action == "confirm" then -- Confirm
+			-- Restore interface
 			Popup.Menu.draw_popup(false)
 			self.onConfirm(cursor)
 			break
-		elseif key_action == "cancel" or key_action == nil then -- 取消或未定义的输入
-			-- 恢复界面
+		elseif key_action == "cancel" or key_action == nil then -- Cancel or undefined input
+			-- Restore interface
 			Popup.Menu.draw_popup(false)
 			self.onCancel()
 			break
@@ -261,24 +261,24 @@ function Popup.Menu:show()
 end
 
 local entry = function(_, job)
-	-- 插件参数
+	-- Plugin parameters
 	local flags = { around = false, debug = false }
 	for k, v in pairs(job.args) do
 		flags[k] = v
 	end
 
 	local sync_state = miscellaneous()
-	-- 没选择文件 光标下也没文件
+	-- No file selected and no file under cursor
 	if #sync_state.cursor_files == 0 and #sync_state.selected_files == 0 then
 		return
 	end
 
-	-- 没选择文件 使用光标下的文件
+	-- No file selected, use file under cursor
 	if #sync_state.selected_files == 0 then
 		sync_state.selected_files = sync_state.cursor_files
 	end
 
-	-- 获取文件 MIME
+	-- Get file MIME type
 	local selected_mimetype_set = {}
 	-- stylua: ignore
 	local file_child, file_err = Command("file")
@@ -302,7 +302,7 @@ local entry = function(_, job)
 	end
 
 
-	-- 获取动作列表
+	-- Get action list
 	-- stylua: ignore
 	local action_child, action_err = Command("sh")
 		:cwd(ya.quote(sync_state.actions_path))
@@ -320,40 +320,40 @@ local entry = function(_, job)
 		local line, event = action_child:read_line()
 		if event == 0 then
 			local action_path = string.gsub(line, "/%s$", "")
-			-- 加载动作脚本配置信息
+			-- Load action script configuration
 			local action_config = dofile(string.format("%s/%s/info.lua", sync_state.actions_path, action_path))
-			-- 单一文件
+			-- Single file
 			if action_config.single_or_multi == "single" and #sync_state.selected_files ~= 1 then
 				goto continue_get_action
 			end
-			-- 多个文件
+			-- Multiple files
 			if action_config.single_or_multi == "multi" and #sync_state.selected_files == 1 then
 				goto continue_get_action
 			end
-			-- 检查不允许的MIME类型
+			-- Check disallowed MIME types
 			if action_config.disableMimes ~= nil then
 				for _, mimetype in pairs(action_config.disableMimes) do
 					if selected_mimetype_set[mimetype] then
-						-- 直接跳过
+						-- Skip directly
 						goto continue_get_action
 					end
 				end
 			end
-			-- 检查允许的MIME类型列表 有并且不是空的
+			-- Check allowed MIME type list - exists and not empty
 			if action_config.enableMimes ~= nil and #action_config.enableMimes ~= 0 then
-				-- 将允许表转换为集合便于快速查找
+				-- Convert allowed table to set for quick lookup
 				local enableMimes_set = {}
 				for _, mimetype in pairs(action_config.enableMimes) do
 					enableMimes_set[mimetype] = true
 				end
 				for selected_mimetype in pairs(selected_mimetype_set) do
-					-- 文件MIME在允许范围外
+					-- File MIME is outside allowed range
 					if not enableMimes_set[selected_mimetype] then
 						goto continue_get_action
 					end
 				end
 			end
-			-- 没有允许表或所选文件都在允许范围内 直接添加
+			-- No allow list or all selected files are within allowed range - add directly
 			table.insert(action_names, action_config.name)
 			table.insert(action_paths, action_path)
 		elseif event == 2 then
@@ -362,7 +362,7 @@ local entry = function(_, job)
 		::continue_get_action::
 	end
 
-	-- 动作列表是空的
+	-- Action list is empty
 	if #action_paths == 0 then
 		ya.notify({
 			title = "Action Script Not Found ",
@@ -376,11 +376,11 @@ local entry = function(_, job)
 	local onConfirm = function(cursor)
 		local mod = dofile(string.format("%s/%s/init.lua", sync_state.actions_path, action_paths[cursor]))
 		mod:init({
-			-- 脚本工作目录
+			-- Script working directory
 			workpath = sync_state.actions_path .. "/" .. action_paths[cursor],
-			-- 所选文件
+			-- Selected files
 			selected = sync_state.selected_files,
-			-- 插件的参数
+			-- Plugin parameters
 			flags = flags,
 		})
 	end
